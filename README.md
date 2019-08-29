@@ -4,6 +4,9 @@ This project is an AR mobile game based on legacy Pong game. This contains only 
 **Note!**
 This created on Unity 2019.1.5f1, but 2019.2.0f has problems with Android SDK, so I recommend open this project with Unity 2019.1.5f1 above and Unity 2019.2.0 below.
 
+**Note2!**
+Most of my work is in folders starting with **MyOwn** and my real project is the scene **ARPongGame** in **MyOwnScenes** folder
+
 ## Packages requiment:
 
 * AR Foundation 2.1.1
