@@ -17,6 +17,8 @@ TagManager:
   - Goal3
   - Goal4
   - EnemyGoal
+  - Enemy
+  - PowerUp
   layers:
   - Default
   - TransparentFX

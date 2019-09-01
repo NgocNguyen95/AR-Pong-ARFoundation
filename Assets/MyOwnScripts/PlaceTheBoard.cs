@@ -24,9 +24,11 @@ public class PlaceTheBoard : IntEventInvoker
 
     Vector2 centerScreenPos;
     static List<ARRaycastHit> listHits = new List<ARRaycastHit>();
-    Button PlaceHereButton;    
+    [SerializeField] Button PlaceHereButton;    
     Pose hitPose;
     bool boardIsPlaced = false;
+
+    Timer delayRespawnNewBoardTimer;
 
     /// <summary>
     /// The object instantiated as a result of a successful raycast intersection with a plane.
@@ -46,12 +48,18 @@ public class PlaceTheBoard : IntEventInvoker
     {
         centerScreenPos = new Vector2(Screen.width / 2, Screen.height / 2);
 
-        // add as invoker for BoardPlacedEvent
-        unityEvents.Add(EventName.BoardPlacedEvent, new BoardPlacedEvent());
-        EventManager.AddInvoker(EventName.BoardPlacedEvent, this);
+        // add listener for restart game event
+        EventManager.AddListener(EventName.RestartGameEvent, HandleRestartGameEvent);
 
         // add listener for game over event
         EventManager.AddListener(EventName.GameOverEvent, HandleGameOverEvent);
+
+        // create timer
+        delayRespawnNewBoardTimer = gameObject.AddComponent<Timer>();
+        delayRespawnNewBoardTimer.Duration = 0.5f;
+        delayRespawnNewBoardTimer.AddTimerFinishedEventListener(HandleDelayRespawnNewBoardTimerFinishedEvent);
+
+        PlaceHereButton.onClick.AddListener(PositionSelected);
     }
 
     // Update is called once per frame
@@ -69,10 +77,6 @@ public class PlaceTheBoard : IntEventInvoker
                 {
                     spawnedObject = Instantiate(board);
                     SessionOrigin.MakeContentAppearAt(spawnedObject.transform, hitPose.position, hitPose.rotation);
-
-                    // finds and gets the place the board button
-                    PlaceHereButton = GameObject.FindGameObjectWithTag("PlaceHereButton").GetComponent<Button>();
-                    PlaceHereButton.onClick.AddListener(PositionSelected);
                 }
                 else
                 {
@@ -109,21 +113,34 @@ public class PlaceTheBoard : IntEventInvoker
     {
         Debug.Log("Board placed!");
         boardIsPlaced = true;
-        boardTransform = spawnedObject.transform;
+        boardTransform = GameObject.FindGameObjectWithTag("PlayArea").gameObject.transform;
+    }
 
-        unityEvents[EventName.BoardPlacedEvent].Invoke(0);
+    /// <summary>
+    /// Handle restart game event
+    /// </summary>
+    /// <param name="unused">unused</param>
+    void HandleRestartGameEvent (int unused)
+    {
+        Time.timeScale = 1;
+        delayRespawnNewBoardTimer.Run();
+    }
+
+    void HandleDelayRespawnNewBoardTimerFinishedEvent()
+    {
+        GameObject newBoard = Instantiate(board);
+        newBoard.transform.position = boardTransform.position;
+        newBoard.transform.rotation = boardTransform.rotation;
+
+        PlaceBoard();
     }
 
     /// <summary>
     /// Handle game over event
     /// </summary>
     /// <param name="unused">unused</param>
-    void HandleGameOverEvent (int unused)
+    void HandleGameOverEvent(int unused)
     {
-        spawnedObject = Instantiate(board);
-        spawnedObject.transform.position = boardTransform.position;
-        spawnedObject.transform.rotation = boardTransform.rotation;
-
-        PlaceBoard();
+        Destroy(GameObject.FindGameObjectWithTag("PlayArea").gameObject);
     }
 }

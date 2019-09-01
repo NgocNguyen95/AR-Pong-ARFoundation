@@ -9,5 +9,11 @@ public enum EventName
    BallRespawnedEvent,
    GoalEvent,
    KnockedOutEvent,
-   GameOverEvent
+   GameOverEvent,
+   TimerChangedEvent,
+   RestartGameEvent,
+   RespawnBallEvent,
+   PowerUpRespawnedEvent,
+   PowerUpTakenEvent,
+   PlayerBeFreezeSelectedEvent
 }

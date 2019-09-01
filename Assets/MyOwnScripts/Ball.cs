@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Ball : MonoBehaviour
+public class Ball : IntEventInvoker
 {
 
     public float speed;
@@ -17,8 +17,14 @@ public class Ball : MonoBehaviour
     void Start()
     {
         ballmoves = false;
-        timeToMove = Time.time + 2f;
+        timeToMove = Time.time + 1f;
         rb = GetComponent<Rigidbody>();
+
+        // add as invoker for ball respawned event
+        unityEvents.Add(EventName.BallRespawnedEvent, new BallRespawnedEvent());
+        EventManager.AddInvoker(EventName.BallRespawnedEvent, this);
+
+        unityEvents[EventName.BallRespawnedEvent].Invoke(0);
     }
 
     // Update is called once per frame
@@ -63,5 +69,10 @@ public class Ball : MonoBehaviour
         {
             gameObject.GetComponent<SphereCollider>().isTrigger = false;
         }
+    }
+
+    private void OnDestroy()
+    {
+        EventManager.RemoveInvoker(EventName.BallRespawnedEvent, this);
     }
 }

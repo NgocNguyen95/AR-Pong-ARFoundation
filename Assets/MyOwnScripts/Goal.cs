@@ -54,4 +54,9 @@ public class Goal : IntEventInvoker
             isGoal = false;
         }
     }
+
+    private void OnDestroy()
+    {
+        EventManager.RemoveInvoker(EventName.GoalEvent, this);
+    }
 }

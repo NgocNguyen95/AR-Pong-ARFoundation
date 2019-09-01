@@ -9,7 +9,15 @@ public class Gameplay : IntEventInvoker
     [SerializeField] GameObject BallPrefab;
     [SerializeField] GameObject PlayArea;
 
+    [SerializeField] GameObject PowerUpPrefab;
+    GameObject powerUp;
+
     [SerializeField] GameObject[] Players = new GameObject[5];
+
+    Timer ballRespawnDelayTimer;
+    Timer powerUpRespawnTimer;
+
+    bool gameOver = false;
     
     // Start is called before the first frame update
     void Start()
@@ -20,18 +28,28 @@ public class Gameplay : IntEventInvoker
         // add listener for game started event
         EventManager.AddListener(EventName.GameStartedEvent, HandleGameStartedEvent);
 
-        // add as invoker for ball respawned event
-        unityEvents.Add(EventName.BallRespawnedEvent, new BallRespawnedEvent());
-        EventManager.AddInvoker(EventName.BallRespawnedEvent, this);
-
-        // add as listener for goal event
-        EventManager.AddListener(EventName.GoalEvent, HandleGoalEvent);
-
-        // add listener for game over event
-        EventManager.AddListener(EventName.GameOverEvent, HandleGameOverEvent);
+        // add as listener for respawn ball event
+        EventManager.AddListener(EventName.RespawnBallEvent, HandleRespawnBallEvent);
 
         // add listener for knocked out event
         EventManager.AddListener(EventName.KnockedOutEvent, HandleKnockedOutEvent);
+
+        // add as invoker for power up respawned event
+        unityEvents.Add(EventName.PowerUpRespawnedEvent, new PowerUpRespawnedEvent());
+        EventManager.AddInvoker(EventName.PowerUpRespawnedEvent, this);
+
+        // add listener for power up taken event
+        EventManager.AddListener(EventName.PowerUpTakenEvent, HandlePowerUpTakenEvent);
+
+        // create timer for ball respawn delay
+        ballRespawnDelayTimer = gameObject.AddComponent<Timer>();
+        ballRespawnDelayTimer.Duration = 0.5f;
+        ballRespawnDelayTimer.AddTimerFinishedEventListener(HandleBallRespawnDelayTimerFinishedEvent);
+
+        // create timer for power up respawn
+        powerUpRespawnTimer = gameObject.AddComponent<Timer>();
+        powerUpRespawnTimer.Duration = RandomPowerUpRespawnDuration();
+        powerUpRespawnTimer.AddTimerFinishedEventListener(HandlePowerUpRespawnTimerFinished);
     }
 
     // Update is called once per frame
@@ -53,7 +71,8 @@ public class Gameplay : IntEventInvoker
         {
             GameObject player = GameObject.FindGameObjectWithTag("Player" + i);
             Players[i] = player;
-        }  
+        }
+        gameOver = false;
     }  
     
     /// <summary>
@@ -63,6 +82,7 @@ public class Gameplay : IntEventInvoker
     void HandleGameStartedEvent(int unused)
     {
         RespawnBall();
+        powerUpRespawnTimer.Run();
     }
 
     /// <summary>
@@ -71,25 +91,15 @@ public class Gameplay : IntEventInvoker
     void RespawnBall()
     {
         Instantiate(BallPrefab, PlayArea.transform);
-        unityEvents[EventName.BallRespawnedEvent].Invoke(0);
     }
 
     /// <summary>
-    /// Handle the goal event
+    /// Handle repsawn ball event
     /// </summary>
     /// <param name="unused">unused</param>
-    void HandleGoalEvent (int unused)
+    void HandleRespawnBallEvent (int unused)
     {
-        RespawnBall();
-    }
-
-    /// <summary>
-    /// Handle game over event
-    /// </summary>
-    /// <param name="unused">unused</param>
-    void HandleGameOverEvent (int unused)
-    {
-        Destroy(PlayArea.gameObject);
+        ballRespawnDelayTimer.Run();
     }
 
     /// <summary>
@@ -99,5 +109,37 @@ public class Gameplay : IntEventInvoker
     void HandleKnockedOutEvent (int playerKnockedOut)
     {
         Destroy(Players[playerKnockedOut].gameObject);
+    }
+
+    void HandleBallRespawnDelayTimerFinishedEvent()
+    {
+        RespawnBall();
+    }
+
+    /// <summary>
+    /// Take a random duration for power up timer
+    /// </summary>
+    /// <returns>return a random float number</returns>
+    float RandomPowerUpRespawnDuration()
+    {
+        return Random.Range(5, 10);
+    }
+
+    void HandlePowerUpRespawnTimerFinished()
+    {
+        powerUp = Instantiate(PowerUpPrefab);
+        unityEvents[EventName.PowerUpRespawnedEvent].Invoke(0);
+    }
+
+    /// <summary>
+    /// Handle power up taken event
+    /// </summary>
+    /// <param name="unsued">unused</param>
+    void HandlePowerUpTakenEvent (int unsued)
+    {
+        Destroy(powerUp.gameObject);
+        Time.timeScale = 1;
+        powerUpRespawnTimer.Duration = RandomPowerUpRespawnDuration();
+        powerUpRespawnTimer.Run();
     }
 }
