@@ -4,17 +4,10 @@ This project is an AR mobile game based on legacy Pong game. This contains only 
 ## About gameplay
 This game is based on Pong game, player will controls the paddle to protect the goal and leads the ball to 3 enemy's goals. There is one power up will respawn random in game, who take it first can use it, which can freeze 1 enemy's paddle in 2 seconds. Any goal has 3 stars as 3 time hit, if any player on board lose 3 stars who will be knocked out. 
 
-**Note!**
-This created on Unity 2019.1.5f1, but 2019.2.0f has problems with Android SDK, so I recommend open this project with Unity 2019.1.5f1 above and Unity 2019.2.0 below.
+## Requiments:
 
-**Note2!**
-Most of my work is in folders starting with **MyOwn** and my real project is the scene **ARPongGame** in **MyOwnScenes** folder
-
-## Packages requiment:
-
-* AR Foundation 2.1.1
-* ARCore XR Plugin 2.1.1
-* ARKit XR Plugin 2.1.1
-
-**Note!**
-Do not download 2.2 version if you are not using iOS 13 and X code 11
+* Unity 2019.2.6f1 (later is possible).
+* AR Foundation 2.1.4
+* AR Subsystems 2.1.1
+* ARCore XR Plugin 2.1.2
+* ARKit XR Plugin 2.1.2
