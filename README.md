@@ -11,3 +11,6 @@ This game is based on Pong game, player will controls the paddle to protect the 
 * AR Subsystems 2.1.1
 * ARCore XR Plugin 2.1.2
 * ARKit XR Plugin 2.1.2
+
+## Demo video
+[YouTube video demo](https://youtu.be/-3hJzJi2DeY)
