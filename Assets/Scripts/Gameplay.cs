@@ -122,7 +122,7 @@ public class Gameplay : IntEventInvoker
     /// <returns>return a random float number</returns>
     float RandomPowerUpRespawnDuration()
     {
-        return Random.Range(5, 10);
+        return Random.Range(30, 40);
     }
 
     void HandlePowerUpRespawnTimerFinished()
