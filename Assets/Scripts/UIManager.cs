@@ -51,6 +51,9 @@ public class UIManager : IntEventInvoker
         unityEvents.Add(EventName.PowerUpTakenEvent, new PowerUpTakenEvent());
         EventManager.AddInvoker(EventName.PowerUpTakenEvent, this);
 
+        // add listener for power up taken event
+        EventManager.AddListener(EventName.PowerUpTakenEvent, HandlePowerUpTakenEvent);
+
         // add as invoker of the player be freeze selected event
         unityEvents.Add(EventName.PlayerBeFreezeSelectedEvent, new PlayerBeFreezeSelectedEvent());
         EventManager.AddInvoker(EventName.PlayerBeFreezeSelectedEvent, this);
@@ -173,11 +176,10 @@ public class UIManager : IntEventInvoker
     /// Take the power up when get power up on click
     /// </summary>
     void TakePowerUp()
-    {
-        crossHair.gameObject.SetActive(false);
+    {        
         getPowerUpButton.gameObject.SetActive(false);
         isPowerUpRespawned = false;
-        unityEvents[EventName.PowerUpTakenEvent].Invoke(0);
+        unityEvents[EventName.PowerUpTakenEvent].Invoke(1);
 
         activatePowerUpButton.gameObject.SetActive(true);
     }
@@ -210,5 +212,14 @@ public class UIManager : IntEventInvoker
         isFreezePowerUpActivated = false;
 
         unityEvents[EventName.PlayerBeFreezeSelectedEvent].Invoke(playerGotFreeze);
+    }
+
+    /// <summary>
+    /// Handle the event power up taken
+    /// </summary>
+    /// <param name="unused">not in used</param>
+    void HandlePowerUpTakenEvent(int unused)
+    {
+        crossHair.gameObject.SetActive(false);
     }
 }

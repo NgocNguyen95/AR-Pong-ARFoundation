@@ -10,12 +10,15 @@ public class Gameplay : IntEventInvoker
     [SerializeField] GameObject PlayArea;
 
     [SerializeField] GameObject PowerUpPrefab;
+    [SerializeField] GameObject BlockWallPrefab;
     GameObject powerUp;
 
     [SerializeField] GameObject[] Players = new GameObject[5];
 
     Timer ballRespawnDelayTimer;
     Timer powerUpRespawnTimer;
+    Timer enemyTakePowerUpTimer;
+    Timer enemyUsePowerUpTimer;
 
     bool gameOver = false;
     
@@ -41,6 +44,10 @@ public class Gameplay : IntEventInvoker
         // add listener for power up taken event
         EventManager.AddListener(EventName.PowerUpTakenEvent, HandlePowerUpTakenEvent);
 
+        // add this as invoker for power up taken event
+        unityEvents.Add(EventName.PowerUpTakenEvent, new PowerUpTakenEvent());
+        EventManager.AddInvoker(EventName.PowerUpTakenEvent, this);
+
         // create timer for ball respawn delay
         ballRespawnDelayTimer = gameObject.AddComponent<Timer>();
         ballRespawnDelayTimer.Duration = 0.5f;
@@ -50,6 +57,16 @@ public class Gameplay : IntEventInvoker
         powerUpRespawnTimer = gameObject.AddComponent<Timer>();
         powerUpRespawnTimer.Duration = RandomPowerUpRespawnDuration();
         powerUpRespawnTimer.AddTimerFinishedEventListener(HandlePowerUpRespawnTimerFinished);
+
+        // create timer for enemies take powerUp
+        enemyTakePowerUpTimer = gameObject.AddComponent<Timer>();
+        enemyTakePowerUpTimer.Duration = 0.3f;
+        enemyTakePowerUpTimer.AddTimerFinishedEventListener(HandleEnemyTakePowerUpTimerFinished);
+
+        // create timer for enemis use powerUp
+        enemyUsePowerUpTimer = gameObject.AddComponent<Timer>();
+        enemyUsePowerUpTimer.Duration = 3f;
+        enemyUsePowerUpTimer.AddTimerFinishedEventListener(EnemyUsePowerUp);
     }
 
     // Update is called once per frame
@@ -122,24 +139,45 @@ public class Gameplay : IntEventInvoker
     /// <returns>return a random float number</returns>
     float RandomPowerUpRespawnDuration()
     {
-        return Random.Range(30, 40);
+        return Random.Range(20, 40);
     }
 
     void HandlePowerUpRespawnTimerFinished()
     {
-        powerUp = Instantiate(PowerUpPrefab);
+        powerUp = Instantiate(PowerUpPrefab, PlayArea.transform);
         unityEvents[EventName.PowerUpRespawnedEvent].Invoke(0);
+
+        enemyTakePowerUpTimer.Run();
     }
 
     /// <summary>
     /// Handle power up taken event
     /// </summary>
-    /// <param name="unsued">unused</param>
-    void HandlePowerUpTakenEvent (int unsued)
+    /// <param name="playerTookPowerUp">player number who took the power up</param>
+    void HandlePowerUpTakenEvent (int playerTookPowerUp)
     {
         Destroy(powerUp.gameObject);
         Time.timeScale = 1;
         powerUpRespawnTimer.Duration = RandomPowerUpRespawnDuration();
         powerUpRespawnTimer.Run();
+
+        if (playerTookPowerUp == 1)
+        {
+            enemyTakePowerUpTimer.Stop();
+        }
+        else
+        {
+            enemyUsePowerUpTimer.Run();
+        }
+    }
+
+    void HandleEnemyTakePowerUpTimerFinished ()
+    {
+        unityEvents[EventName.PowerUpTakenEvent].Invoke(0);
+    }
+
+    void EnemyUsePowerUp()
+    {
+        Instantiate(BlockWallPrefab, PlayArea.transform);
     }
 }
